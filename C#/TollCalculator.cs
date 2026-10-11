@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Globalization;
 using TollFeeCalculator;
 
 public class TollCalculator
@@ -24,6 +23,35 @@ public class TollCalculator
         new(new TimeOnly(18, 0), new TimeOnly(18, 29), 8),
     };
 
+    /// <summary>
+    /// Individual toll-free dates (public holidays), keyed by full date so that a
+    /// new year is added as pure data. Recurring toll-free periods (whole months
+    /// or weeks) and weekends are handled by rule and are not listed here.
+    /// </summary>
+    private static readonly HashSet<DateOnly> TollFreeDates = new()
+    {
+        // 2013
+        new DateOnly(2013, 1, 1),    // Nyårsdagen
+        new DateOnly(2013, 3, 28),   // Skärtorsdag
+        new DateOnly(2013, 3, 29),   // Långfredagen
+        new DateOnly(2013, 4, 1),    // Påskdagen
+        new DateOnly(2013, 4, 30),   // Annandag påsk
+        new DateOnly(2013, 5, 1),    // Föreståndardagen
+        new DateOnly(2013, 5, 8),    // Kristi himmelsfärdsdag
+        new DateOnly(2013, 5, 9),    // Kristi himmelfärd
+        new DateOnly(2013, 6, 5),    // Nationaldagen
+        new DateOnly(2013, 6, 6),    // Nationaldagen
+        new DateOnly(2013, 6, 21),   // Midsommardagen
+        new DateOnly(2013, 11, 1),   // Alla helgons dagar
+        new DateOnly(2013, 12, 24),  // Julafton
+        new DateOnly(2013, 12, 25),  // Juldagen
+        new DateOnly(2013, 12, 26),  // Annandag jul
+        new DateOnly(2013, 12, 31)   // Nyårsafton
+    };
+
+    // Recurring toll-free periods, regardless of year.
+    private static readonly HashSet<int> TollFreeMonths = new() { 7 }; // whole of July (Stockholm rule)
+    
     /**
      * Calculate the total toll fee for one day
      *
@@ -107,29 +135,14 @@ public class TollCalculator
         return 0;
     }
 
-    private Boolean IsTollFreeDate(DateTime date)
+    private bool IsTollFreeDate(DateTime date)
     {
-        int year = date.Year;
-        int month = date.Month;
-        int day = date.Day;
+        DateOnly day = DateOnly.FromDateTime(date);
 
-        if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday) return true;
+        if (day.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday) return true;
+        if (TollFreeMonths.Contains(day.Month)) return true;
 
-        if (year == 2013)
-        {
-            if (month == 1 && day == 1 ||
-                month == 3 && (day == 28 || day == 29) ||
-                month == 4 && (day == 1 || day == 30) ||
-                month == 5 && (day == 1 || day == 8 || day == 9) ||
-                month == 6 && (day == 5 || day == 6 || day == 21) ||
-                month == 7 ||
-                month == 11 && day == 1 ||
-                month == 12 && (day == 24 || day == 25 || day == 26 || day == 31))
-            {
-                return true;
-            }
-        }
-        return false;
+        return TollFreeDates.Contains(day);
     }
 
     private enum TollFreeVehicles
