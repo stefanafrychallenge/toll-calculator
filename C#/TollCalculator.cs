@@ -15,6 +15,24 @@ public class TollCalculator
 
     public int GetTollFee(Vehicle vehicle, DateTime[] dates)
     {
+        // Check for null
+        if (vehicle == null || dates == null) throw new ArgumentNullException();
+
+        // Check if the dates array is empty
+        if (dates.Length == 0) throw new ArgumentException("Dates array is empty");
+
+        // If we have only one date, just return the fee for that one
+        if (dates.Length == 1) return GetTollFee(dates[0], vehicle);
+
+        // Check that all dates are on the same day, by comparing the first date to the rest. (Trust but verify)
+        for (int i = 1; i < dates.Length; i++)
+        {
+            if (!dates[i].Date.Equals(dates[0].Date)) throw new ArgumentException("Dates are not on the same day");
+        }
+
+        // Sort the dates
+        Array.Sort(dates);
+
         DateTime intervalStart = dates[0];
         int totalFee = 0;
         foreach (DateTime date in dates)
