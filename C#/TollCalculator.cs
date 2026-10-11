@@ -64,7 +64,9 @@ public class TollCalculator
     };
     
     /**
-     * Calculate the total toll fee for one day
+     * Calculate the total toll fee for one day.
+     *
+     * The supplied dates array is not modified.
      *
      * @param vehicle - the vehicle
      * @param dates   - date and time of all passes on one day
@@ -88,16 +90,17 @@ public class TollCalculator
             if (!dates[i].Date.Equals(dates[0].Date)) throw new ArgumentException("Dates are not on the same day");
         }
 
-        // Sort the dates
-        Array.Sort(dates);
+        // Work on a copy so the caller's array is left untouched.
+        DateTime[] sorted = (DateTime[])dates.Clone();
+        Array.Sort(sorted);
 
         // Calculate the daily total: within each 1-hour window (anchored at the
         // first pass of the window) only the highest fee is charged.
-        DateTime windowstart = dates[0];
+        DateTime windowstart = sorted[0];
         int windowfee = 0;
         int totalfee = 0;
 
-        foreach (DateTime date in dates)
+        foreach (DateTime date in sorted)
         {
             int fee = GetTollFee(date, vehicle);
 
