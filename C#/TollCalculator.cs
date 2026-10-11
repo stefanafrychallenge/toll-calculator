@@ -25,28 +25,28 @@ public class TollCalculator
 
     /// <summary>
     /// Individual toll-free dates (public holidays), keyed by full date so that a
-    /// new year is added as pure data. Recurring toll-free periods (whole months
-    /// or weeks) and weekends are handled by rule and are not listed here.
+    /// new year is added as pure data. Recurring toll-free periods (whole months)
+    /// and weekends are handled by rule and are not listed here.
     /// </summary>
     private static readonly HashSet<DateOnly> TollFreeDates = new()
     {
         // 2013
-        new DateOnly(2013, 1, 1),    // Nyårsdagen
-        new DateOnly(2013, 3, 28),   // Skärtorsdag
-        new DateOnly(2013, 3, 29),   // Långfredagen
-        new DateOnly(2013, 4, 1),    // Påskdagen
-        new DateOnly(2013, 4, 30),   // Annandag påsk
-        new DateOnly(2013, 5, 1),    // Föreståndardagen
-        new DateOnly(2013, 5, 8),    // Kristi himmelsfärdsdag
-        new DateOnly(2013, 5, 9),    // Kristi himmelfärd
-        new DateOnly(2013, 6, 5),    // Nationaldagen
-        new DateOnly(2013, 6, 6),    // Nationaldagen
-        new DateOnly(2013, 6, 21),   // Midsommardagen
-        new DateOnly(2013, 11, 1),   // Alla helgons dagar
-        new DateOnly(2013, 12, 24),  // Julafton
-        new DateOnly(2013, 12, 25),  // Juldagen
-        new DateOnly(2013, 12, 26),  // Annandag jul
-        new DateOnly(2013, 12, 31)   // Nyårsafton
+        new DateOnly(2013, 1, 1),
+        new DateOnly(2013, 3, 28),
+        new DateOnly(2013, 3, 29),
+        new DateOnly(2013, 4, 1),
+        new DateOnly(2013, 4, 30),
+        new DateOnly(2013, 5, 1),
+        new DateOnly(2013, 5, 8),
+        new DateOnly(2013, 5, 9),
+        new DateOnly(2013, 6, 5),
+        new DateOnly(2013, 6, 6),
+        new DateOnly(2013, 6, 21),
+        new DateOnly(2013, 11, 1),
+        new DateOnly(2013, 12, 24),
+        new DateOnly(2013, 12, 25),
+        new DateOnly(2013, 12, 26),
+        new DateOnly(2013, 12, 31)
     };
 
     // Recurring toll-free periods, regardless of year.
