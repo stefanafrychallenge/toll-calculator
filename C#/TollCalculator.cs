@@ -4,7 +4,7 @@ using TollFeeCalculator;
 
 public class TollCalculator
 {
-
+    private const int MAX_TOLL_FEE_PER_DAY = 60; // Max fee per day is 60
     /**
      * Calculate the total toll fee for one day
      *
@@ -33,29 +33,32 @@ public class TollCalculator
         // Sort the dates
         Array.Sort(dates);
 
-        DateTime intervalStart = dates[0];
-        int totalFee = 0;
+        // Calculating the dayly total fee for the day, using a sliding window of 1 hour
+        DateTime windowstart = dates[0];
+        int windowfee = 0;
+        int totalfee = 0;
+
         foreach (DateTime date in dates)
         {
-            int nextFee = GetTollFee(date, vehicle);
-            int tempFee = GetTollFee(intervalStart, vehicle);
+            int fee = GetTollFee(date, vehicle);
 
-            long diffInMillies = date.Millisecond - intervalStart.Millisecond;
-            long minutes = diffInMillies/1000/60;
-
-            if (minutes <= 60)
+            if ((date - windowstart).TotalMinutes <= 60)
             {
-                if (totalFee > 0) totalFee -= tempFee;
-                if (nextFee >= tempFee) tempFee = nextFee;
-                totalFee += tempFee;
+                windowfee = Math.Max(windowfee, fee);
             }
             else
             {
-                totalFee += nextFee;
+                totalfee += windowfee;
+                windowstart = date;
+                windowfee = fee;
             }
         }
-        if (totalFee > 60) totalFee = 60;
-        return totalFee;
+
+        totalfee += windowfee;
+
+        if (totalfee > MAX_TOLL_FEE_PER_DAY) return MAX_TOLL_FEE_PER_DAY;
+
+        return totalfee;
     }
 
     private bool IsTollFreeVehicle(Vehicle vehicle)
