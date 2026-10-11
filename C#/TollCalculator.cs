@@ -5,6 +5,21 @@ using TollFeeCalculator;
 public class TollCalculator
 {
     private const int MAX_TOLL_FEE_PER_DAY = 60; // Max fee per day is 60
+
+    // Fee intervals
+    private static readonly (TimeOnly Start, TimeOnly End, int Fee)[] FeeIntervals = 
+    {
+        ( new TimeOnly(6, 0), new TimeOnly(6, 29), 8),
+        ( new TimeOnly(6, 30), new TimeOnly(6, 59), 13),
+        ( new TimeOnly(7, 0), new TimeOnly(7, 59), 18),
+        ( new TimeOnly(8, 0), new TimeOnly(8, 29), 13),
+        ( new TimeOnly(8, 30), new TimeOnly(14, 59), 8),
+        ( new TimeOnly(15, 0), new TimeOnly(15, 29), 13),
+        ( new TimeOnly(15, 30), new TimeOnly(16, 59), 18),
+        ( new TimeOnly(17, 0), new TimeOnly(17, 59), 13),
+        ( new TimeOnly(18, 0), new TimeOnly(18, 29), 8)
+    };
+
     /**
      * Calculate the total toll fee for one day
      *
@@ -77,19 +92,13 @@ public class TollCalculator
     {
         if (IsTollFreeDate(date) || IsTollFreeVehicle(vehicle)) return 0;
 
-        int hour = date.Hour;
-        int minute = date.Minute;
+        TimeOnly time = new TimeOnly(date.Hour, date.Minute);
+        foreach (var interval in FeeIntervals)
+        {
+            if (time >= interval.Start && time <= interval.End) return interval.Fee;
+        }
 
-        if (hour == 6 && minute >= 0 && minute <= 29) return 8;
-        else if (hour == 6 && minute >= 30 && minute <= 59) return 13;
-        else if (hour == 7 && minute >= 0 && minute <= 59) return 18;
-        else if (hour == 8 && minute >= 0 && minute <= 29) return 13;
-        else if (hour >= 8 && hour <= 14 && minute >= 30 && minute <= 59) return 8;
-        else if (hour == 15 && minute >= 0 && minute <= 29) return 13;
-        else if (hour == 15 && minute >= 0 || hour == 16 && minute <= 59) return 18;
-        else if (hour == 17 && minute >= 0 && minute <= 59) return 13;
-        else if (hour == 18 && minute >= 0 && minute <= 29) return 8;
-        else return 0;
+        return 0;
     }
 
     private Boolean IsTollFreeDate(DateTime date)
