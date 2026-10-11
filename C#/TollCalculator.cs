@@ -1,23 +1,27 @@
 ﻿using System;
-using System.Globalization;
+using System.Collections.Generic;
 using TollFeeCalculator;
 
 public class TollCalculator
 {
     private const int MAX_TOLL_FEE_PER_DAY = 60; // Max fee per day is 60
 
-    // Fee intervals
-    private static readonly (TimeOnly Start, TimeOnly End, int Fee)[] FeeIntervals = 
+    /// <summary>
+    /// The toll fee schedule. This is the single source of truth: the calculation
+    /// and anything that displays the schedule (e.g. the simulator) both read it,
+    /// so they can never drift apart.
+    /// </summary>
+    public static readonly IReadOnlyList<FeeInterval> Schedule = new FeeInterval[]
     {
-        ( new TimeOnly(6, 0), new TimeOnly(6, 29), 8),
-        ( new TimeOnly(6, 30), new TimeOnly(6, 59), 13),
-        ( new TimeOnly(7, 0), new TimeOnly(7, 59), 18),
-        ( new TimeOnly(8, 0), new TimeOnly(8, 29), 13),
-        ( new TimeOnly(8, 30), new TimeOnly(14, 59), 8),
-        ( new TimeOnly(15, 0), new TimeOnly(15, 29), 13),
-        ( new TimeOnly(15, 30), new TimeOnly(16, 59), 18),
-        ( new TimeOnly(17, 0), new TimeOnly(17, 59), 13),
-        ( new TimeOnly(18, 0), new TimeOnly(18, 29), 8)
+        new(new TimeOnly(6, 0),  new TimeOnly(6, 29),  8),
+        new(new TimeOnly(6, 30), new TimeOnly(6, 59),  13),
+        new(new TimeOnly(7, 0),  new TimeOnly(7, 59),  18),
+        new(new TimeOnly(8, 0),  new TimeOnly(8, 29),  13),
+        new(new TimeOnly(8, 30), new TimeOnly(14, 59), 8),
+        new(new TimeOnly(15, 0), new TimeOnly(15, 29), 13),
+        new(new TimeOnly(15, 30), new TimeOnly(16, 59), 18),
+        new(new TimeOnly(17, 0), new TimeOnly(17, 59), 13),
+        new(new TimeOnly(18, 0), new TimeOnly(18, 29), 8),
     };
 
     /**
@@ -48,7 +52,8 @@ public class TollCalculator
         // Sort the dates
         Array.Sort(dates);
 
-        // Calculating the dayly total fee for the day, using a sliding window of 1 hour
+        // Calculate the daily total: within each 1-hour window (anchored at the
+        // first pass of the window) only the highest fee is charged.
         DateTime windowstart = dates[0];
         int windowfee = 0;
         int totalfee = 0;
@@ -93,7 +98,8 @@ public class TollCalculator
         if (IsTollFreeDate(date) || IsTollFreeVehicle(vehicle)) return 0;
 
         TimeOnly time = new TimeOnly(date.Hour, date.Minute);
-        foreach (var interval in FeeIntervals)
+
+        foreach (FeeInterval interval in Schedule)
         {
             if (time >= interval.Start && time <= interval.End) return interval.Fee;
         }
